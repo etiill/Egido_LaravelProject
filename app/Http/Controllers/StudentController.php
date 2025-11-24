@@ -8,24 +8,32 @@ use Livewire\Attributes\Validate;
 
 class StudentController extends Controller
 {
-    public function index()
-    {
-        $students = Student::latest()->get();
+   public function index()
+{
+    $students = Student::with('course')->latest()->get();
+    $courses = \App\Models\Course::all();
+    $activeCourses = \App\Models\Course::where('status', 'active')->count();
 
-        return view('dashboard', compact('students'));
-    }
+    return view('dashboard', compact('students', 'courses', 'activeCourses'));
+}
+
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:students,email',
-            'phone' => 'required|string|max:15',
-            'address' => 'required|string|max:255',
-        ]);
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:students,email',
+        'phone' => 'required|string|max:15',
+        'address' => 'required|string|max:255',
+        'course_id' => 'required|exists:courses,id',
+    ]);
 
-        Student::create($validated);
+    Student::create($validated);
 
-        return redirect()->back()->with('success', 'Student added successfully.');
-    }
+    return redirect()->back()->with('success', 'Student added successfully.');
 }
+
+}
+
+
+
